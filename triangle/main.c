@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "shader.h"
@@ -58,16 +59,18 @@ int main()
     glBindVertexArray(VAO); // bind VAO, below vertex attrib will be stored to VAO
 
     float vertices[] = {
-        0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f};
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f};
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (const void *)0); // 3 means 3 number in a row
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void *)0); // 3 means 3 number in a row
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     unsigned int indices[] = {
         0, 1, 2,
@@ -104,7 +107,7 @@ int main()
     //                                                                        //
     ////////////////////////////////////////////////////////////////////////////
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //

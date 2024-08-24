@@ -252,3 +252,16 @@ void shader_use_program(shader s)
 
 void shader_set_uniform_int(shader s, int v);
 void shader_set_uniform_float(shader s, float v);
+
+void shader_set_uniform_4_float(shader s, const char *name, float v0, float v1, float v2, float v3)
+{
+    struct shader_context *ctx = s;
+
+    if (!ctx || ctx->program == 0)
+    {
+        logerror("invalid failed");
+        return;
+    }
+
+    glUniform4f(glGetUniformLocation(ctx->program, name), v0, v1, v2, v3);
+}
