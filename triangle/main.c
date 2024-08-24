@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "shader.h"
 #include "log.h"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -12,100 +13,6 @@ void process_input(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
-}
-
-static int check_error(GLuint x)
-{
-    PFNGLGETSHADERIVPROC glGetiv;
-    PFNGLGETSHADERINFOLOGPROC glGetInfoLog;
-    PFNGLDELETEPROGRAMPROC glDelete;
-    GLenum pname_status;
-
-    if (glIsShader(x))
-    {
-        glGetiv = glGetShaderiv;
-        glGetInfoLog = glGetShaderInfoLog;
-        glDelete = glDeleteShader;
-        pname_status = GL_COMPILE_STATUS;
-    }
-    else if (glIsProgram(x))
-    {
-        glGetiv = glGetProgramiv;
-        glGetInfoLog = glGetProgramInfoLog;
-        glDelete = glDeleteProgram;
-        pname_status = GL_LINK_STATUS;
-    }
-    else
-    {
-        logerror("invalid x");
-        return -1;
-    }
-
-    GLint success;
-    glGetiv(x, pname_status, &success);
-    if (!success)
-    {
-        GLint info_len = 0;
-        glGetiv(x, GL_INFO_LOG_LENGTH, &info_len);
-        if (info_len > 1)
-        {
-            char *info_log = calloc(1, info_len);
-            glGetInfoLog(x, info_len, NULL, info_log);
-            logerror("failed: %s", info_log);
-            free(info_log);
-        }
-        glDelete(x);
-        return -1;
-    }
-
-    return 0;
-}
-
-static GLuint load_shader(GLenum type, const char *shader_src)
-{
-    GLuint shader = glCreateShader(type);
-    if (shader == 0)
-    {
-        logerror("glCreateShader failed");
-        return 0;
-    }
-
-    // load the shader source
-    glShaderSource(shader, 1, &shader_src, NULL);
-
-    // compile the shader
-    glCompileShader(shader);
-
-    if (check_error(shader) != 0)
-    {
-        logerror("error accured");
-        return 0;
-    }
-
-    return shader;
-}
-
-static GLuint link_program(GLuint vertex_shader, GLuint fragment_shader)
-{
-    GLuint program = glCreateProgram();
-    if (program == 0)
-    {
-        logerror("glCreateProgram failed");
-        return 0;
-    }
-
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-
-    glLinkProgram(program);
-
-    if (check_error(program) != 0)
-    {
-        logerror("error occured");
-        return 0;
-    }
-
-    return program;
 }
 
 int main()
@@ -181,12 +88,6 @@ int main()
         "{                                                                   \n"
         "    gl_Position = vec4(aPos, 1.0);                                  \n"
         "}                                                                  \n";
-    GLuint vertex_shader = load_shader(GL_VERTEX_SHADER, vertex_shader_src);
-    if (vertex_shader == 0)
-    {
-        logerror("load_shader vertex failed");
-        return -1;
-    }
 
     char fragment_shader_src[] =
         "#version 330 core                                                   \n"
@@ -195,21 +96,15 @@ int main()
         "{                                                                   \n"
         "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);                       \n"
         "}                                                                  \n";
-    GLuint fragment_shader = load_shader(GL_FRAGMENT_SHADER, fragment_shader_src);
-    if (fragment_shader == 0)
+
+    shader shader0 = shader_init(vertex_shader_src, fragment_shader_src);
+    if (!shader0)
     {
-        logerror("loader_shader fragment failed");
+        logerror("init_shader failed");
         return -1;
     }
 
-    GLuint program = link_program(vertex_shader, fragment_shader);
-    if (program == 0)
-    {
-        logerror("link_program failed");
-        return -1;
-    }
-
-    glUseProgram(program); // use here for glUniform
+    shader_use_program(shader0);
 
     // uniform
 
@@ -237,7 +132,7 @@ int main()
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(program);
+        shader_use_program(shader0);
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 

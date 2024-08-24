@@ -19,9 +19,9 @@ target_link_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glfw/lib-vc2019"
 )
 
-target_link_options(${PROJECT_NAME} PRIVATE
-    "/NODEFAULTLIB:MSVCRT"
-)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_link_options(${PROJECT_NAME} PRIVATE "/NODEFAULTLIB:MSVCRT")
+endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     "glfw3"
