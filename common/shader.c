@@ -1,3 +1,5 @@
+#include <corecrt.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -146,6 +148,74 @@ error3:
     delete_shader(ctx->vertex_shader);
 error2:
     free(ctx);
+error1:
+    return NULL;
+}
+
+shader shader_init_by_filename(const char *vertex_shader_filename, const char *fragment_shader_filename)
+{
+    FILE *vertex_shader_fp = NULL, *fragment_shader_fp = NULL;
+
+#if defined(_WIN32)
+    errno_t err = fopen_s(&vertex_shader_fp, vertex_shader_filename, "rb");
+    if (err != 0)
+    {
+        logerror("fopen_s %s failed, err: %d", vertex_shader_filename, err);
+        goto error1;
+    }
+    err = fopen_s(&fragment_shader_fp, fragment_shader_filename, "rb");
+    if (err != 0)
+    {
+        logerror("fopen_s %s failed, err: %d", fragment_shader_filename, err);
+        goto error2;
+    }
+#else
+    fprintf(stderr, "alskdfjalskdjflasdjflajsdflajsdlfjasljdfl");
+    exit(-1);
+#endif
+
+    fseek(vertex_shader_fp, 0, SEEK_END);
+    int vertex_shader_length = ftell(vertex_shader_fp);
+    rewind(vertex_shader_fp);
+    char *vertex_shader_buffer = calloc(1, vertex_shader_length + 1);
+    if (!vertex_shader_buffer)
+    {
+        logerror("calloc failed");
+        goto error3;
+    }
+    fread(vertex_shader_buffer, 1, vertex_shader_length, vertex_shader_fp);
+
+    fseek(fragment_shader_fp, 0, SEEK_END);
+    int fragment_shader_length = ftell(vertex_shader_fp);
+    rewind(fragment_shader_fp);
+    char *fragment_shader_buffer = calloc(1, fragment_shader_length + 1);
+    if (!fragment_shader_buffer)
+    {
+        logerror("calloc failed");
+        goto error4;
+    }
+    fread(fragment_shader_buffer, 1, fragment_shader_length, fragment_shader_fp);
+
+    shader s = shader_init(vertex_shader_buffer, fragment_shader_buffer);
+    if (!s)
+    {
+        logerror("shader_init failed");
+        goto error5;
+    }
+
+    free(vertex_shader_buffer);
+    free(fragment_shader_buffer);
+
+    return s;
+
+error5:
+    free(fragment_shader_buffer);
+error4:
+    free(vertex_shader_buffer);
+error3:
+    fclose(fragment_shader_fp);
+error2:
+    fclose(vertex_shader_fp);
 error1:
     return NULL;
 }
