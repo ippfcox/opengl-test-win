@@ -250,7 +250,18 @@ void shader_use_program(shader s)
     glUseProgram(ctx->program);
 }
 
-void shader_set_uniform_int(shader s, int v);
+void shader_set_uniform_int(shader s, const char *name, int i0)
+{
+    struct shader_context *ctx = s;
+
+    if (!ctx || ctx->program == 0)
+    {
+        logerror("invalid failed");
+        return;
+    }
+
+    glUniform1i(glGetUniformLocation(ctx->program, name), i0);
+}
 
 void shader_set_uniform_float(shader s, const char *name, float f0)
 {
@@ -261,8 +272,6 @@ void shader_set_uniform_float(shader s, const char *name, float f0)
         logerror("invalid failed");
         return;
     }
-
-    loginfo("%d", glGetUniformLocation(ctx->program, name));
 
     glUniform1f(glGetUniformLocation(ctx->program, name), f0);
 }
