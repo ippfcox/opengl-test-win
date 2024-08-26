@@ -71,10 +71,10 @@ int main()
 
     // vertex.x, vertex.y, vertex.z, color.r, color.g, color.b, texture.x, texture.y
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f};
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f};
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -108,7 +108,8 @@ int main()
 
     shader_use_program(shader0);
 
-    // shader_set_uniform_int(shader0, "aTexture", 0); // sampler2D aTexture <-> GL_TEXTURE0
+    shader_set_uniform_int(shader0, "aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
+    shader_set_uniform_int(shader0, "aTexture1", 1); // sampler2D aTexture <-> GL_TEXTURE0
 
     // uniform
 
@@ -125,15 +126,35 @@ int main()
     }
     GLenum texture_format = texture_channels == 3 ? GL_RGB : GL_RGBA;
 
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    GLuint texture_0;
+    glGenTextures(1, &texture_0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, texture_format, texture_width, texture_height, 0, texture_format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(texture);
+    glGenerateMipmap(texture_0);
+    stbi_image_free(data);
+
+    data = stbi_load("../../asset/awesomeface.png", &texture_width, &texture_height, &texture_channels, 0);
+    if (!data)
+    {
+        logerror("stbi_load failed");
+        return -1;
+    }
+    texture_format = texture_channels == 3 ? GL_RGB : GL_RGBA;
+    GLuint texture_1;
+    glGenTextures(1, &texture_1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture_1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, texture_format, texture_width, texture_height, 0, texture_format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(texture_1);
     stbi_image_free(data);
 
     ////////////////////////////////////////////////////////////////////////////

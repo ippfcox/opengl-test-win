@@ -186,7 +186,7 @@ shader shader_init_by_filename(const char *vertex_shader_filename, const char *f
     fread(vertex_shader_buffer, 1, vertex_shader_length, vertex_shader_fp);
 
     fseek(fragment_shader_fp, 0, SEEK_END);
-    int fragment_shader_length = ftell(vertex_shader_fp);
+    int fragment_shader_length = ftell(fragment_shader_fp);
     rewind(fragment_shader_fp);
     char *fragment_shader_buffer = calloc(1, fragment_shader_length + 1);
     if (!fragment_shader_buffer)
