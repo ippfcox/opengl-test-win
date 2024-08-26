@@ -85,7 +85,7 @@ int main()
     ////////////////////////////////////////////////////////////////////////////
 
     // shader shader0 = shader_init(vertex_shader_src, fragment_shader_src);
-    shader shader0 = shader_init_by_filename("../../../triangle/vertex.glsl", "../../../triangle/fragment.glsl");
+    shader shader0 = shader_init_by_filename("../../triangle/vertex.glsl", "../../triangle/fragment.glsl");
     if (!shader0)
     {
         logerror("init_shader failed");
