@@ -1,6 +1,8 @@
 #include "shader.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include "spdlog/spdlog.h"
 
 int main()
@@ -166,6 +168,18 @@ int main()
 
         shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
+
+        glm::mat4 trans(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        shader0.SetUniform("transform", glm::value_ptr(trans));
+        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+
+        trans = glm::mat4(1.0f);
+        float scale_value = (sin(glfwGetTime()) + 1) / 2;
+        trans = glm::scale(trans, glm::vec3(scale_value, scale_value, scale_value));
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        shader0.SetUniform("transform", glm::value_ptr(trans));
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(GL_NONE);

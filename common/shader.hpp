@@ -21,6 +21,7 @@ public:
     void SetUniform(const std::string &uniform_name, int i0);
     void SetUniform(const std::string &uniform_name, float f0);
     void SetUniform(const std::string &uniform_name, float f0, float f1, float f2, float f3);
+    void SetUniform(const std::string &uniform_name, const float *matrix4fv);
 
 private:
     GLuint vertex_shader_, fragment_shader_, program_;

@@ -86,6 +86,11 @@ void Shader::SetUniform(const std::string &uniform_name, float f0, float f1, flo
     glUniform4f(glGetUniformLocation(program_, uniform_name.c_str()), f0, f1, f2, f3);
 }
 
+void Shader::SetUniform(const std::string &uniform_name, const float *matrix4fv)
+{
+    glUniformMatrix4fv(glGetUniformLocation(program_, uniform_name.c_str()), 1, GL_FALSE, matrix4fv);
+}
+
 int Shader::CheckError(GLuint x)
 {
     PFNGLGETSHADERIVPROC glGetiv;
