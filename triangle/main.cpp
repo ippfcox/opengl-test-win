@@ -57,22 +57,20 @@ int main()
     //        |                  |
     //      -1.0                0.0
 
-    // vertex.x, vertex.y, vertex.z, color.r, color.g, color.b, texture.x, texture.y
+    // vertex.x, vertex.y, vertex.z, texture.x, texture.y
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+        0.5f, 0.5f, 0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f};
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (const void *)0); // 3 means 3 number in a row
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void *)0); // 3 means 3 number in a row
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (const void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (const void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     unsigned int indices[] = {
         0, 1, 2,
@@ -93,13 +91,6 @@ int main()
         SPDLOG_ERROR("InitByFilename failed");
         return -1;
     }
-
-    shader0.Use();
-
-    shader0.SetUniform("aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
-    shader0.SetUniform("aTexture1", 1); // sampler2D aTexture <-> GL_TEXTURE1
-
-    glUseProgram(GL_NONE);
 
     ////////////////////////////////////////////////////////////////////////////
     //                                 texture                                //
@@ -126,24 +117,9 @@ int main()
     glGenerateMipmap(texture_0);
     stbi_image_free(data);
 
-    data = stbi_load("../../asset/awesomeface.png", &texture_width, &texture_height, &texture_channels, 0);
-    if (!data)
-    {
-        SPDLOG_ERROR("stbi_load failed");
-        return -1;
-    }
-    texture_format = texture_channels == 3 ? GL_RGB : GL_RGBA;
-    GLuint texture_1;
-    glGenTextures(1, &texture_1);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture_1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, texture_format, texture_width, texture_height, 0, texture_format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(texture_1);
-    stbi_image_free(data);
+    shader0.Use();
+    shader0.SetUniform("aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
+    glUseProgram(GL_NONE);
 
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
@@ -162,7 +138,7 @@ int main()
     //                           matrix                                       //
     ////////////////////////////////////////////////////////////////////////////
     glm::mat4 model(1.0f);
-    model = glm::rotate(model, glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 view(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
     glm::mat4 projection(1.0f);
