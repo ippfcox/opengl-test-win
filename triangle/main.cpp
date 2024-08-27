@@ -182,6 +182,10 @@ int main()
     // projection
     glm::mat4 projection(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+    // camera
+    glm::vec3 camera_position(0.0f, 0.0f, 3.0f);
+    glm::vec3 camera_front(0.0f, 0.0f, -1.0f);
+    glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 
     glm::vec3 cube_positions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -200,11 +204,26 @@ int main()
     //                            glfw loop                                   //
     ////////////////////////////////////////////////////////////////////////////
 
+    float time_delta = 0.0f, time_last = 0.0f;
+
     while (!glfwWindowShouldClose(window))
     {
+        float time_curr = (float)glfwGetTime();
+        time_delta = time_curr - time_last;
+        time_last = time_curr;
+
+        float camera_speed = 2.5f * time_delta;
         // process input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            camera_position += camera_front * camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera_position -= camera_front * camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            camera_position -= glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera_position += glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -221,10 +240,7 @@ int main()
             shader0.SetUniform("model", glm::value_ptr(model));
 
             glm::mat4 view(1.0f);
-            view = glm::lookAt(
-                glm::vec3(sin(glfwGetTime()) * 5.0f, 0.0f, cos(glfwGetTime()) * 5.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f));
+            view = glm::lookAt(camera_position, camera_position + camera_front, camera_up);
             shader0.SetUniform("view", glm::value_ptr(view));
             shader0.SetUniform("projection", glm::value_ptr(projection));
 
