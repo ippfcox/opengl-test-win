@@ -9,12 +9,15 @@ aux_source_directory("${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glad/src" SRC)
 
 add_executable(${PROJECT_NAME} ${SRC})
 
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/spdlog/lib/cmake/spdlog")
+
+find_package(spdlog REQUIRED)
+
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../common"
     "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glad/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glfw/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/stb/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glm/include"
 )
 
 target_link_directories(${PROJECT_NAME} PRIVATE
@@ -26,6 +29,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
+    spdlog::spdlog
     "glfw3"
     "opengl32"
     "legacy_stdio_definitions"

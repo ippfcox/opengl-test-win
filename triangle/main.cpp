@@ -1,28 +1,11 @@
-#include <stdlib.h>
-#include <math.h>
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include "shader.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include "shader.h"
-#include "log.h"
-
-#define _
-
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-void process_input(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, 1);
-}
+#include "spdlog/spdlog.h"
 
 int main()
 {
-    set_log_level(LOG_LEVEL_DEBUG);
+    spdlog::set_level(spdlog::level::debug);
 
     ////////////////////////////////////////////////////////////////////////////
     //                              glfw                                      //
@@ -37,7 +20,7 @@ int main()
     GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
     if (!window)
     {
-        logerror("glfwCreateWindow failed");
+        SPDLOG_ERROR("glfwCreateWindow failed");
         glfwTerminate();
         return -1;
     }
@@ -50,7 +33,7 @@ int main()
     // glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        logerror("gladLoadGLLoader failed");
+        SPDLOG_ERROR("gladLoadGLLoader failed");
         return -1;
     }
 
@@ -98,20 +81,18 @@ int main()
     //                            shader                                      //
     ////////////////////////////////////////////////////////////////////////////
 
-    // shader shader0 = shader_init(vertex_shader_src, fragment_shader_src);
-    shader shader0 = shader_init_by_filename("../../triangle/vertex.glsl", "../../triangle/fragment.glsl");
-    if (!shader0)
+    Shader shader0;
+    int ret = shader0.InitByFilename("../../triangle/vertex.glsl", "../../triangle/fragment.glsl");
+    if (ret != 0)
     {
-        logerror("init_shader failed");
+        SPDLOG_ERROR("InitByFilename failed");
         return -1;
     }
 
-    shader_use_program(shader0);
+    shader0.Use();
 
-    shader_set_uniform_int(shader0, "aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
-    shader_set_uniform_int(shader0, "aTexture1", 1); // sampler2D aTexture <-> GL_TEXTURE0
-
-    // uniform
+    shader0.SetUniform("aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
+    shader0.SetUniform("aTexture1", 1); // sampler2D aTexture <-> GL_TEXTURE1
 
     ////////////////////////////////////////////////////////////////////////////
     //                                 texture                                //
@@ -121,7 +102,7 @@ int main()
     stbi_uc *data = stbi_load("../../asset/container.jpg", &texture_width, &texture_height, &texture_channels, 0);
     if (!data)
     {
-        logerror("stbi_load failed");
+        SPDLOG_ERROR("stbi_load failed");
         return -1;
     }
     GLenum texture_format = texture_channels == 3 ? GL_RGB : GL_RGBA;
@@ -141,7 +122,7 @@ int main()
     data = stbi_load("../../asset/awesomeface.png", &texture_width, &texture_height, &texture_channels, 0);
     if (!data)
     {
-        logerror("stbi_load failed");
+        SPDLOG_ERROR("stbi_load failed");
         return -1;
     }
     texture_format = texture_channels == 3 ? GL_RGB : GL_RGBA;
@@ -162,7 +143,7 @@ int main()
     ////////////////////////////////////////////////////////////////////////////
 
     glViewport(0, 0, 800, 600);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); });
 
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
@@ -176,12 +157,14 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        process_input(window);
+        // process input
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        shader_use_program(shader0);
+        shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
