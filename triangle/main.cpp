@@ -175,10 +175,11 @@ int main()
     ////////////////////////////////////////////////////////////////////////////
     //                           matrix                                       //
     ////////////////////////////////////////////////////////////////////////////
-    glm::mat4 model(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 view(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    // model
+    // glm::mat4 model(1.0f);
+    // view
+    // glm::mat4 view(1.0f);
+    // projection
     glm::mat4 projection(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
@@ -211,8 +212,6 @@ int main()
         shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
 
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(0.01f), glm::vec3(0.5f, 1.0f, 0.0f));
-
         for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); ++i)
         {
             glm::mat4 model(1.0f);
@@ -220,10 +219,17 @@ int main()
             model = glm::translate(model, cube_positions[i]);
             model = glm::rotate(model, glm::radians(20.0f * i) + angle_delta, glm::vec3(1.0f, 0.3f, 0.5f));
             shader0.SetUniform("model", glm::value_ptr(model));
+
+            glm::mat4 view(1.0f);
+            view = glm::lookAt(
+                glm::vec3(sin(glfwGetTime()) * 5.0f, 0.0f, cos(glfwGetTime()) * 5.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 1.0f, 0.0f));
+            shader0.SetUniform("view", glm::value_ptr(view));
+            shader0.SetUniform("projection", glm::value_ptr(projection));
+
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
         }
-        shader0.SetUniform("view", glm::value_ptr(view));
-        shader0.SetUniform("projection", glm::value_ptr(projection));
 
         glBindVertexArray(GL_NONE);
         glUseProgram(GL_NONE);
