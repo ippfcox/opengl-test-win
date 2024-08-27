@@ -8,6 +8,11 @@
 constexpr int SCREEN_WIDTH = 800;
 constexpr int SCREEN_HEIGHT = 600;
 
+float last_xpos = SCREEN_WIDTH / 2.0f;
+float last_ypos = SCREEN_HEIGHT / 2.0f;
+float yaw = 0, pitch = 0;
+float fov = 45.0f;
+
 int main()
 {
     spdlog::set_level(spdlog::level::debug);
@@ -165,12 +170,32 @@ int main()
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); });
 
+    glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xpos, double ypos) {
+        float xoff = xpos - last_xpos;
+        float yoff = last_ypos - ypos;
+        last_xpos = xpos;
+        last_ypos = ypos;
+
+        float sensitivity = 0.05f;
+        yaw += xoff * sensitivity;
+        pitch += yoff * sensitivity;
+        pitch = pitch > 89.0f ? 89.0f : pitch;
+        pitch = pitch < -89.0f ? -89.0f : pitch;
+    });
+
+    glfwSetScrollCallback(window, [](GLFWwindow *window, double xoff, double yoff) {
+        fov -= yoff;
+        fov = fov < 1.0f ? 1.0f : fov;
+        fov = fov > 45.0f ? 45.0f : fov;
+    });
+
     ////////////////////////////////////////////////////////////////////////////
     //                                                                        //
     ////////////////////////////////////////////////////////////////////////////
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     ////////////////////////////////////////////////////////////////////////////
     //                           matrix                                       //
@@ -180,8 +205,7 @@ int main()
     // view
     // glm::mat4 view(1.0f);
     // projection
-    glm::mat4 projection(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+    // glm::mat4 projection(1.0f);
     // camera
     glm::vec3 camera_position(0.0f, 0.0f, 3.0f);
     glm::vec3 camera_front(0.0f, 0.0f, -1.0f);
@@ -231,6 +255,19 @@ int main()
         shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
 
+        camera_front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+        camera_front.y = sin(glm::radians(pitch));
+        camera_front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+        camera_front = glm::normalize(camera_front);
+
+        glm::mat4 view(1.0f);
+        view = glm::lookAt(camera_position, camera_position + camera_front, camera_up);
+        shader0.SetUniform("view", glm::value_ptr(view));
+
+        glm::mat4 projection(1.0f);
+        projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+        shader0.SetUniform("projection", glm::value_ptr(projection));
+
         for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); ++i)
         {
             glm::mat4 model(1.0f);
@@ -238,11 +275,6 @@ int main()
             model = glm::translate(model, cube_positions[i]);
             model = glm::rotate(model, glm::radians(20.0f * i) + angle_delta, glm::vec3(1.0f, 0.3f, 0.5f));
             shader0.SetUniform("model", glm::value_ptr(model));
-
-            glm::mat4 view(1.0f);
-            view = glm::lookAt(camera_position, camera_position + camera_front, camera_up);
-            shader0.SetUniform("view", glm::value_ptr(view));
-            shader0.SetUniform("projection", glm::value_ptr(projection));
 
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
         }
