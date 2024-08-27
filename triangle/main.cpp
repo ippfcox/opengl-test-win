@@ -183,6 +183,7 @@ int main()
     projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
     glm::vec3 cube_positions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(2.0f, 5.0f, -15.0f),
         glm::vec3(-1.5f, -2.2f, -2.5f),
         glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -215,16 +216,14 @@ int main()
         for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); ++i)
         {
             glm::mat4 model(1.0f);
+            float angle_delta = i % 3 == 0 ? (float)glfwGetTime() * glm::radians(9.0f) : 0;
             model = glm::translate(model, cube_positions[i]);
-            model = glm::rotate(model, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, glm::radians(20.0f * i) + angle_delta, glm::vec3(1.0f, 0.3f, 0.5f));
             shader0.SetUniform("model", glm::value_ptr(model));
             glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
         }
-        shader0.SetUniform("model", glm::value_ptr(model));
         shader0.SetUniform("view", glm::value_ptr(view));
         shader0.SetUniform("projection", glm::value_ptr(projection));
-
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(GL_NONE);
         glUseProgram(GL_NONE);
