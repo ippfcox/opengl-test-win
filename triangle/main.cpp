@@ -5,6 +5,9 @@
 #include <glm/ext.hpp>
 #include "spdlog/spdlog.h"
 
+constexpr int SCREEN_WIDTH = 800;
+constexpr int SCREEN_HEIGHT = 600;
+
 int main()
 {
     spdlog::set_level(spdlog::level::debug);
@@ -19,7 +22,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // create window
-    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OpenGL", NULL, NULL);
     if (!window)
     {
         SPDLOG_ERROR("glfwCreateWindow failed");
@@ -96,6 +99,8 @@ int main()
     shader0.SetUniform("aTexture0", 0); // sampler2D aTexture <-> GL_TEXTURE0
     shader0.SetUniform("aTexture1", 1); // sampler2D aTexture <-> GL_TEXTURE1
 
+    glUseProgram(GL_NONE);
+
     ////////////////////////////////////////////////////////////////////////////
     //                                 texture                                //
     ////////////////////////////////////////////////////////////////////////////
@@ -144,7 +149,7 @@ int main()
     //                                                                        //
     ////////////////////////////////////////////////////////////////////////////
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) { glViewport(0, 0, width, height); });
 
     ////////////////////////////////////////////////////////////////////////////
@@ -152,6 +157,16 @@ int main()
     ////////////////////////////////////////////////////////////////////////////
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                           matrix                                       //
+    ////////////////////////////////////////////////////////////////////////////
+    glm::mat4 model(1.0f);
+    model = glm::rotate(model, glm::radians(55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 view(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    glm::mat4 projection(1.0f);
+    projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //
@@ -169,17 +184,10 @@ int main()
         shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
 
-        glm::mat4 trans(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        shader0.SetUniform("transform", glm::value_ptr(trans));
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+        shader0.SetUniform("model", glm::value_ptr(model));
+        shader0.SetUniform("view", glm::value_ptr(view));
+        shader0.SetUniform("projection", glm::value_ptr(projection));
 
-        trans = glm::mat4(1.0f);
-        float scale_value = (sin(glfwGetTime()) + 1) / 2;
-        trans = glm::scale(trans, glm::vec3(scale_value, scale_value, scale_value));
-        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-        shader0.SetUniform("transform", glm::value_ptr(trans));
         glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(GL_NONE);
