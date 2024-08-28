@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "camera.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <glm/glm.hpp>
@@ -10,8 +11,8 @@ constexpr int SCREEN_HEIGHT = 600;
 
 float last_xpos = SCREEN_WIDTH / 2.0f;
 float last_ypos = SCREEN_HEIGHT / 2.0f;
-float yaw = 0, pitch = 0;
-float fov = 45.0f;
+
+Camera camera;
 
 int main()
 {
@@ -176,17 +177,11 @@ int main()
         last_xpos = xpos;
         last_ypos = ypos;
 
-        float sensitivity = 0.05f;
-        yaw += xoff * sensitivity;
-        pitch += yoff * sensitivity;
-        pitch = pitch > 89.0f ? 89.0f : pitch;
-        pitch = pitch < -89.0f ? -89.0f : pitch;
+        camera.ProcessMouseMovement(xoff, yoff, false);
     });
 
     glfwSetScrollCallback(window, [](GLFWwindow *window, double xoff, double yoff) {
-        fov -= yoff;
-        fov = fov < 1.0f ? 1.0f : fov;
-        fov = fov > 45.0f ? 45.0f : fov;
+        camera.ProcessMouseScroll(yoff);
     });
 
     ////////////////////////////////////////////////////////////////////////////
@@ -206,10 +201,6 @@ int main()
     // glm::mat4 view(1.0f);
     // projection
     // glm::mat4 projection(1.0f);
-    // camera
-    glm::vec3 camera_position(0.0f, 0.0f, 3.0f);
-    glm::vec3 camera_front(0.0f, 0.0f, -1.0f);
-    glm::vec3 camera_up(0.0f, 1.0f, 0.0f);
 
     glm::vec3 cube_positions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -236,18 +227,24 @@ int main()
         time_delta = time_curr - time_last;
         time_last = time_curr;
 
-        float camera_speed = 2.5f * time_delta;
+        unsigned camera_direction = 0;
         // process input
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera_position += camera_front * camera_speed;
+            camera_direction |= CAMERA_MOVE_FORWARD;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera_position -= camera_front * camera_speed;
+            camera_direction |= CAMERA_MOVE_BACKWARD;
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera_position -= glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+            camera_direction |= CAMERA_MOVE_LEFT;
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera_position += glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+            camera_direction |= CAMERA_MOVE_RIGHT;
+        if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS)
+        {
+            camera.ShowInfo();
+        }
+
+        camera.ProcessKeyboard(camera_direction, time_delta);
 
         glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -255,17 +252,12 @@ int main()
         shader0.Use();
         glBindVertexArray(VAO); // bind VAO, vertex config is ready, EBO is binded automatically
 
-        camera_front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-        camera_front.y = sin(glm::radians(pitch));
-        camera_front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-        camera_front = glm::normalize(camera_front);
-
         glm::mat4 view(1.0f);
-        view = glm::lookAt(camera_position, camera_position + camera_front, camera_up);
+        view = camera.GetViewMatrix();
         shader0.SetUniform("view", glm::value_ptr(view));
 
         glm::mat4 projection(1.0f);
-        projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.GetFOV()), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
         shader0.SetUniform("projection", glm::value_ptr(projection));
 
         for (int i = 0; i < sizeof(cube_positions) / sizeof(glm::vec3); ++i)
