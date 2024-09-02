@@ -27,6 +27,7 @@ public:
     ~Camera();
     glm::mat4 GetViewMatrix();
     float GetFOV();
+    glm::vec3 GetPosition();
     void ProcessKeyboard(unsigned int direction, float time_delta);
     void ProcessMouseMovement(float xoff, float yoff, bool constrain_pitch);
     void ProcessMouseScroll(float yoff);

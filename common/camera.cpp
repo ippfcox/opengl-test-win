@@ -19,6 +19,11 @@ float Camera::GetFOV()
     return zoom_;
 }
 
+glm::vec3 Camera::GetPosition()
+{
+    return position_;
+}
+
 void Camera::ProcessKeyboard(unsigned int direction, float time_delta)
 {
     float velocity = movement_speed_ * time_delta;
