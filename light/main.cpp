@@ -176,6 +176,8 @@ int main()
     float theta = 0;
     float theta_step = 0.1;
 
+    float blink_interval = 0.5f;
+
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //
     ////////////////////////////////////////////////////////////////////////////
@@ -210,13 +212,19 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::vec3 position_light(radius * cos(theta), radius * sin(theta), 2.0f);
+        glm::vec3 position_light(radius * cos(theta), 2.0f, radius * sin(theta));
         theta += time_delta * theta_step;
+        glm::vec3 light_ambient(sin(time_delta * blink_interval));
 
         shader_cube.Use();
-        shader_cube.SetUniform("objectColor", 1.0f, 0.5f, 0.31f);
-        shader_cube.SetUniform("lightColor", 1.0f, 1.0f, 1.0f);
-        shader_cube.SetUniform("lightPos", position_light);
+        shader_cube.SetUniform("material.ambient", 1.0f, 0.5f, 0.31f);
+        shader_cube.SetUniform("material.diffuse", 1.0f, 0.5f, 0.31f);
+        shader_cube.SetUniform("material.specular", 0.5f, 0.5f, 0.5f);
+        shader_cube.SetUniform("material.shininess", 32.0f);
+        shader_cube.SetUniform("light.ambient", light_ambient);
+        shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
+        shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
+        shader_cube.SetUniform("light.position", position_light);
         shader_cube.SetUniform("viewPos", camera.GetPosition());
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.GetFOV()), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
