@@ -172,7 +172,9 @@ int main()
     //                           matrix                                       //
     ////////////////////////////////////////////////////////////////////////////
 
-    glm::vec3 position_light(1.2f, 1.0f, 2.0f);
+    float radius = 2.0f;
+    float theta = 0;
+    float theta_step = 0.1;
 
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //
@@ -207,6 +209,9 @@ int main()
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glm::vec3 position_light(radius * cos(theta), radius * sin(theta), 2.0f);
+        theta += time_delta * theta_step;
 
         shader_cube.Use();
         shader_cube.SetUniform("objectColor", 1.0f, 0.5f, 0.31f);
