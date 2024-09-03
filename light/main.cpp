@@ -4,8 +4,8 @@
 #include "stb_image.h"
 #include "spdlog/spdlog.h"
 
-constexpr int SCREEN_WIDTH = 800;
-constexpr int SCREEN_HEIGHT = 600;
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 720;
 
 float last_xpos = SCREEN_WIDTH / 2.0f;
 float last_ypos = SCREEN_HEIGHT / 2.0f;
@@ -289,7 +289,11 @@ int main()
         shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
         shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
-        shader_cube.SetUniform("light.direction", -0.2f, -1.0f, -0.3f);
+        shader_cube.SetUniform("light.position", position_light);
+        shader_cube.SetUniform("light.constant", 1.0f);
+        shader_cube.SetUniform("light.linear", 0.09f);
+        shader_cube.SetUniform("light.quadratic", 0.032f);
+
         shader_cube.SetUniform("viewPos", camera.GetPosition());
 
         glBindVertexArray(VAO_cube); // bind VAO, vertex config is ready, EBO is binded automatically
@@ -303,8 +307,8 @@ int main()
         {
             model = glm::mat4(1.0f);
             model = glm::translate(model, cube_positions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            float angle = glm::radians(20.0f * i) + (float)glfwGetTime() * glm::radians(18.0f);
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
             shader_cube.SetUniform("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
