@@ -231,7 +231,18 @@ int main()
     float theta = 0;
     float theta_step = 0.1;
 
-    float blink_interval = 0.5f;
+    glm::vec3 cube_positions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f, 2.0f, -2.5f),
+        glm::vec3(1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f),
+    };
 
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //
@@ -269,28 +280,35 @@ int main()
 
         glm::vec3 position_light(radius * cos(theta), 2.0f, radius * sin(theta));
         theta += time_delta * theta_step;
-        glm::vec3 light_ambient(sin(time_delta * blink_interval));
 
         shader_cube.Use();
         shader_cube.SetUniform("material.ambient", 1.0f, 0.5f, 0.31f);
         shader_cube.SetUniform("material.diffuse", 1.0f, 0.5f, 0.31f);
         shader_cube.SetUniform("material.specular", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("material.shininess", 32.0f);
-        shader_cube.SetUniform("light.ambient", light_ambient);
+        shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
         shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
-        shader_cube.SetUniform("light.position", position_light);
+        shader_cube.SetUniform("light.direction", -0.2f, -1.0f, -0.3f);
         shader_cube.SetUniform("viewPos", camera.GetPosition());
+
+        glBindVertexArray(VAO_cube); // bind VAO, vertex config is ready, EBO is binded automatically
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.GetFOV()), (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
         shader_cube.SetUniform("projection", projection);
         glm::mat4 view = camera.GetViewMatrix();
         shader_cube.SetUniform("view", view);
-        glm::mat4 model = glm::mat4(1.0f);
-        shader_cube.SetUniform("model", model);
+        glm::mat4 model;
+        for (int i = 0; i < sizeof(cube_positions) / sizeof(cube_positions[0]); ++i)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cube_positions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shader_cube.SetUniform("model", model);
 
-        glBindVertexArray(VAO_cube); // bind VAO, vertex config is ready, EBO is binded automatically
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         shader_light.Use();
         shader_light.SetUniform("projection", projection);
