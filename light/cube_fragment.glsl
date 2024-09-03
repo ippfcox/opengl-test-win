@@ -14,6 +14,9 @@ in vec2 TexCoords;
 struct Light
 {
     vec3 position;
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
 
     vec3 ambient;
     vec3 diffuse;
@@ -51,6 +54,10 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
 
-    vec3 result = attenuation * (ambient + diffuse + specular);
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intersity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    vec3 result = attenuation * (ambient + intersity * (diffuse + specular));
     FragColor = vec4(result, 1.0);
 }

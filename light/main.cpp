@@ -289,7 +289,11 @@ int main()
         shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
         shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
-        shader_cube.SetUniform("light.position", position_light);
+        // shader_cube.SetUniform("light.position", position_light);
+        shader_cube.SetUniform("light.position", camera.GetPosition());
+        shader_cube.SetUniform("light.direction", camera.GetDirection());
+        shader_cube.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
+        shader_cube.SetUniform("light.outerCutOff", glm::cos(glm::radians(15.0f)));
         shader_cube.SetUniform("light.constant", 1.0f);
         shader_cube.SetUniform("light.linear", 0.09f);
         shader_cube.SetUniform("light.quadratic", 0.032f);
