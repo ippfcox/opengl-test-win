@@ -244,6 +244,13 @@ int main()
         glm::vec3(-1.3f, 1.0f, -1.5f),
     };
 
+    glm::vec3 point_light_positions[] = {
+        glm::vec3(0.7f, 0.2f, 2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f, 2.0f, -12.0f),
+        glm::vec3(0.0f, 0.0f, -3.0f),
+    };
+
     ////////////////////////////////////////////////////////////////////////////
     //                            glfw loop                                   //
     ////////////////////////////////////////////////////////////////////////////
@@ -286,17 +293,54 @@ int main()
         shader_cube.SetUniform("material.diffuse", 1.0f, 0.5f, 0.31f);
         shader_cube.SetUniform("material.specular", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("material.shininess", 32.0f);
-        shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
-        shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
-        shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
-        // shader_cube.SetUniform("light.position", position_light);
-        shader_cube.SetUniform("light.position", camera.GetPosition());
-        shader_cube.SetUniform("light.direction", camera.GetDirection());
-        shader_cube.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
-        shader_cube.SetUniform("light.outerCutOff", glm::cos(glm::radians(15.0f)));
-        shader_cube.SetUniform("light.constant", 1.0f);
-        shader_cube.SetUniform("light.linear", 0.09f);
-        shader_cube.SetUniform("light.quadratic", 0.032f);
+        // shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
+        // shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
+        // shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
+        // // shader_cube.SetUniform("light.position", position_light);
+        // shader_cube.SetUniform("light.position", camera.GetPosition());
+        // shader_cube.SetUniform("light.direction", camera.GetDirection());
+        // shader_cube.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
+        // shader_cube.SetUniform("light.outerCutOff", glm::cos(glm::radians(15.0f)));
+        // shader_cube.SetUniform("light.constant", 1.0f);
+        // shader_cube.SetUniform("light.linear", 0.09f);
+        // shader_cube.SetUniform("light.quadratic", 0.032f);
+        // directional light
+        shader_cube.SetUniform("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        shader_cube.SetUniform("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        shader_cube.SetUniform("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        shader_cube.SetUniform("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // point light 1
+        shader_cube.SetUniform("pointLights[0].position", point_light_positions[0]);
+        shader_cube.SetUniform("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+        shader_cube.SetUniform("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        shader_cube.SetUniform("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        shader_cube.SetUniform("pointLights[0].constant", 1.0f);
+        shader_cube.SetUniform("pointLights[0].linear", 0.09f);
+        shader_cube.SetUniform("pointLights[0].quadratic", 0.032f);
+        // point light 2
+        shader_cube.SetUniform("pointLights[1].position", point_light_positions[1]);
+        shader_cube.SetUniform("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+        shader_cube.SetUniform("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        shader_cube.SetUniform("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        shader_cube.SetUniform("pointLights[1].constant", 1.0f);
+        shader_cube.SetUniform("pointLights[1].linear", 0.09f);
+        shader_cube.SetUniform("pointLights[1].quadratic", 0.032f);
+        // point light 3
+        shader_cube.SetUniform("pointLights[2].position", point_light_positions[2]);
+        shader_cube.SetUniform("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        shader_cube.SetUniform("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        shader_cube.SetUniform("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+        shader_cube.SetUniform("pointLights[2].constant", 1.0f);
+        shader_cube.SetUniform("pointLights[2].linear", 0.09f);
+        shader_cube.SetUniform("pointLights[2].quadratic", 0.032f);
+        // point light 4
+        shader_cube.SetUniform("pointLights[3].position", point_light_positions[3]);
+        shader_cube.SetUniform("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+        shader_cube.SetUniform("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        shader_cube.SetUniform("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+        shader_cube.SetUniform("pointLights[3].constant", 1.0f);
+        shader_cube.SetUniform("pointLights[3].linear", 0.09f);
+        shader_cube.SetUniform("pointLights[3].quadratic", 0.032f);
 
         shader_cube.SetUniform("viewPos", camera.GetPosition());
 
