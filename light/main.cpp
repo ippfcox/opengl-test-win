@@ -227,10 +227,6 @@ int main()
     //                           matrix                                       //
     ////////////////////////////////////////////////////////////////////////////
 
-    float radius = 2.0f;
-    float theta = 0;
-    float theta_step = 0.1;
-
     glm::vec3 cube_positions[] = {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(2.0f, 5.0f, -15.0f),
@@ -285,25 +281,11 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::vec3 position_light(radius * cos(theta), 2.0f, radius * sin(theta));
-        theta += time_delta * theta_step;
-
         shader_cube.Use();
         shader_cube.SetUniform("material.ambient", 1.0f, 0.5f, 0.31f);
         shader_cube.SetUniform("material.diffuse", 1.0f, 0.5f, 0.31f);
         shader_cube.SetUniform("material.specular", 0.5f, 0.5f, 0.5f);
         shader_cube.SetUniform("material.shininess", 32.0f);
-        // shader_cube.SetUniform("light.ambient", 0.2f, 0.2f, 0.2);
-        // shader_cube.SetUniform("light.diffuse", 0.5f, 0.5f, 0.5f);
-        // shader_cube.SetUniform("light.specular", 1.0f, 1.0f, 1.0f);
-        // // shader_cube.SetUniform("light.position", position_light);
-        // shader_cube.SetUniform("light.position", camera.GetPosition());
-        // shader_cube.SetUniform("light.direction", camera.GetDirection());
-        // shader_cube.SetUniform("light.cutOff", glm::cos(glm::radians(12.5f)));
-        // shader_cube.SetUniform("light.outerCutOff", glm::cos(glm::radians(15.0f)));
-        // shader_cube.SetUniform("light.constant", 1.0f);
-        // shader_cube.SetUniform("light.linear", 0.09f);
-        // shader_cube.SetUniform("light.quadratic", 0.032f);
         // directional light
         shader_cube.SetUniform("dirLight.direction", -0.2f, -1.0f, -0.3f);
         shader_cube.SetUniform("dirLight.ambient", 0.05f, 0.05f, 0.05f);
@@ -363,15 +345,18 @@ int main()
         }
 
         shader_light.Use();
+        glBindVertexArray(VAO_light); // bind VAO, vertex config is ready, EBO is binded automatically
         shader_light.SetUniform("projection", projection);
         shader_light.SetUniform("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, position_light);
-        model = glm::scale(model, glm::vec3(0.2f));
-        shader_light.SetUniform("model", model);
+        for (int i = 0; i < sizeof(point_light_positions) / sizeof(point_light_positions[0]); ++i)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, point_light_positions[i]);
+            model = glm::scale(model, glm::vec3(0.2f));
+            shader_light.SetUniform("model", model);
 
-        glBindVertexArray(VAO_light); // bind VAO, vertex config is ready, EBO is binded automatically
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glBindVertexArray(GL_NONE);
         glUseProgram(GL_NONE);
