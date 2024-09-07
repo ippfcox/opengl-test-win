@@ -7,7 +7,9 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float m
     UpdateCameraVecs();
 }
 
-Camera::~Camera() {}
+Camera::~Camera()
+{
+}
 
 glm::mat4 Camera::GetViewMatrix()
 {
@@ -41,6 +43,10 @@ void Camera::ProcessKeyboard(unsigned int direction, float time_delta)
         position_ -= right_ * velocity;
     if (direction & CAMERA_MOVE_RIGHT)
         position_ += right_ * velocity;
+    if (direction & CAMERA_MOVE_UP)
+        position_ += up_ * velocity;
+    if (direction & CAMERA_MOVE_DOWN)
+        position_ -= up_ * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoff, float yoff, bool constrain_pitch)

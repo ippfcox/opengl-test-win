@@ -1,5 +1,5 @@
-libdir=D:/projects/repo/assimp-5.4.3/123/Assimp/lib
-includedir=D:/projects/repo/assimp-5.4.3/123/Assimp/include
+libdir=D:\projects\repo\assimp-5.4.3\out/Assimp/lib
+includedir=D:\projects\repo\assimp-5.4.3\out/Assimp/include
 
 Name: Assimp
 Description: Import various well-known 3D model formats in an uniform manner.

@@ -12,6 +12,8 @@ extern "C"
 #define CAMERA_MOVE_BACKWARD (0x01 << 1)
 #define CAMERA_MOVE_LEFT (0x01 << 2)
 #define CAMERA_MOVE_RIGHT (0x01 << 3)
+#define CAMERA_MOVE_UP (0x01 << 4)
+#define CAMERA_MOVE_DOWN (0x01 << 5)
 
 class Camera
 {

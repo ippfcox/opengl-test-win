@@ -9,9 +9,13 @@ aux_source_directory("${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glad/src" SRC)
 
 add_executable(${PROJECT_NAME} ${SRC})
 
-set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/spdlog/lib/cmake/spdlog")
+set(CMAKE_PREFIX_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/spdlog/lib/cmake/spdlog"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/Assimp/lib/cmake/assimp-5.4"
+)
 
 find_package(spdlog REQUIRED)
+find_package(assimp REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/../common"
@@ -31,6 +35,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     spdlog::spdlog
+    assimp::assimp
     "glfw3"
     "opengl32"
     "legacy_stdio_definitions"
