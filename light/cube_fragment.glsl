@@ -72,6 +72,30 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     return (ambient + diffuse + specular);
 }
 
+struct SpotLight
+{
+    vec3 direction;
+    float cutOff;
+    float outerCutOff;
+
+    PointLight pointLight;
+};
+
+uniform SpotLight spotLight;
+
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+{
+    vec3 lightDir = normalize(light.pointLight.position - fragPos);
+
+    vec3 pointLightEffect = CalcPointLight(light.pointLight, normal, fragPos, viewDir);
+
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    return intensity * pointLightEffect;
+}
+
 uniform vec3 viewPos;
 
 in vec3 Normal;
@@ -88,6 +112,8 @@ void main()
 
     for (int i = 0; i < 4; i++)
         result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+
+    result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 
     FragColor = vec4(result, 1.0);
 }
